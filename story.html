@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>História — Tesouros da Bíblia Kids</title>
+  <meta name="theme-color" content="#2E86C1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/logo.png"/>
+  <link rel="icon" href="/favicon.ico" sizes="32x32"/>
+  <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192"/>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --blue:#5DADE2;--blue-dark:#2E86C1;
+      --yellow:#F7DC6F;--yellow-dark:#F0C040;
+      --green:#82E0AA;--green-dark:#58D68D;
+      --white:#FFFFFF;--beige:#FDF2E9;--beige-dark:#FAE5D3;
+      --text:#2C3E50;--text-light:#5D6D7E;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Nunito',sans-serif;background:var(--beige);color:var(--text);min-height:100vh}
+    h1,h2,h3,.logo-text{font-family:'Baloo 2',cursive}
+
+    nav{background:var(--white);box-shadow:0 2px 16px rgba(93,173,226,.10);position:sticky;top:0;z-index:200;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:68px}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+    .logo-icon img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+    .logo-text{font-size:1.35rem;font-weight:800;color:var(--blue-dark);line-height:1.1}
+    .logo-text span{color:var(--yellow-dark)}
+    nav ul{list-style:none;display:flex;gap:1.5rem;align-items:center}
+    nav ul a{text-decoration:none;color:var(--text-light);font-weight:700;font-size:.97rem;transition:color .2s;cursor:pointer}
+    nav ul a:hover{color:var(--blue-dark)}
+    .nav-user{display:flex;align-items:center;gap:.6rem}
+    .nav-user-name{font-size:.88rem;color:var(--text-light);font-weight:700;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .btn-logout{background:#fdecea;color:#c0392b;border:none;border-radius:50px;padding:.3rem .9rem;font-weight:700;font-size:.8rem;cursor:pointer;font-family:'Nunito',sans-serif}
+    .btn-logout:hover{background:#c0392b;color:#fff}
+    .btn-painel{background:#eafaf1;color:#1e8449!important;border:2px solid #a9dfbf;border-radius:50px;padding:.3rem .9rem;font-weight:800;font-size:.8rem;cursor:pointer;font-family:'Nunito',sans-serif}
+    .btn-painel:hover{background:#27ae60;color:#fff!important;border-color:#27ae60}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+    .hamburger span{width:26px;height:3px;background:var(--blue-dark);border-radius:3px;display:block;transition:all .3s}
+    .mobile-nav{display:none;position:fixed;top:68px;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:190}
+    .mobile-nav.open{display:block}
+    .mobile-nav-inner{background:var(--white);display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+    .mobile-nav-inner a{display:block;padding:1rem 1.5rem;color:var(--text);font-weight:700;text-decoration:none;border-bottom:1px solid var(--beige-dark);font-size:1.05rem;cursor:pointer}
+    .mobile-nav-inner a:hover{background:var(--beige);color:var(--blue-dark)}
+
+    .story-banner{padding:3rem 1.5rem 2rem;text-align:center;position:relative;overflow:hidden}
+    .banner-t1{background:linear-gradient(135deg,#e8f4fd,#d6eaf8)}
+    .banner-t2{background:linear-gradient(135deg,#fef9e7,#fdebd0)}
+    .banner-t3{background:linear-gradient(135deg,#eafaf1,#d5f5e3)}
+    .banner-t4{background:linear-gradient(135deg,#f9f0ff,#e8daef)}
+    .banner-t5{background:linear-gradient(135deg,#fdf2e9,#fad7a0)}
+    .story-emoji-big{font-size:5rem;display:block;margin-bottom:1rem;animation:float 3s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .story-banner h1{font-size:clamp(1.6rem,4vw,2.4rem);color:var(--blue-dark);margin-bottom:.5rem;line-height:1.2}
+    .story-ref-tag{display:inline-block;background:var(--white);color:var(--blue-dark);padding:.35rem 1rem;border-radius:50px;font-weight:700;font-size:.9rem;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:.8rem}
+    .story-cat-tag{display:inline-block;background:var(--blue-dark);color:#fff;padding:.25rem .8rem;border-radius:50px;font-weight:700;font-size:.78rem;margin-left:.5rem}
+
+    .story-container{max-width:680px;margin:0 auto;padding:2rem 1.5rem}
+    .story-text{background:var(--white);border-radius:20px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.5rem}
+    .story-text p{font-size:1.05rem;line-height:1.9;color:var(--text);margin-bottom:.9rem}
+    .story-text p:last-child{margin-bottom:0}
+
+    .lesson-box{background:linear-gradient(135deg,#eafaf1,#d5f5e3);border-radius:20px;padding:1.8rem;border-left:5px solid var(--green-dark);margin-bottom:1.5rem}
+    .lesson-box h3{color:#1a7a3c;font-size:1.1rem;margin-bottom:1rem}
+    .lesson-box ul{list-style:none;padding:0}
+    .lesson-box li{padding:.5rem 0;color:var(--text);font-size:.95rem;line-height:1.5;border-bottom:1px solid rgba(88,214,141,.3);display:flex;gap:.6rem;align-items:flex-start}
+    .lesson-box li:last-child{border-bottom:none}
+    .lesson-box li::before{content:'✦';color:var(--green-dark);flex-shrink:0;margin-top:2px}
+
+    .mark-read-wrap{text-align:center;margin-bottom:1.5rem}
+    .btn-mark{background:var(--beige-dark);border:2px solid var(--yellow-dark);color:var(--text);font-weight:800;font-size:1rem;padding:.75rem 2rem;border-radius:50px;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:.5rem}
+    .btn-mark:hover{background:var(--yellow);transform:scale(1.02)}
+    .btn-mark.is-read{background:#d4edda;border-color:var(--green-dark);color:#155724}
+    .btn-mark:disabled{opacity:.6;cursor:default;transform:none}
+
+    .story-nav{display:flex;gap:1rem;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap}
+    .btn-story-nav{background:var(--white);color:var(--text);border:2px solid var(--beige-dark);padding:.7rem 1.2rem;border-radius:50px;font-weight:800;cursor:pointer;font-size:.85rem;font-family:'Nunito',sans-serif;transition:all .2s;text-decoration:none;flex:1;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-width:0}
+    .btn-story-nav:hover:not([disabled]){border-color:var(--blue);color:var(--blue-dark)}
+    .btn-story-nav[disabled]{opacity:.35;cursor:default;pointer-events:none}
+    .btn-story-nav.center{background:var(--blue-dark);color:#fff;border-color:var(--blue-dark);flex:0 0 auto;padding:.7rem 1.2rem}
+    .btn-story-nav.center:hover{background:#1a6fa3}
+
+    .related-section{margin-top:2rem}
+    .related-section h3{font-size:1.1rem;color:var(--blue-dark);margin-bottom:1rem}
+    .related-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+    .related-card{background:var(--white);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s;border:2px solid transparent;text-decoration:none;color:inherit;display:flex;gap:.7rem;align-items:flex-start}
+    .related-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+    .related-emoji{font-size:1.8rem;flex-shrink:0}
+    .related-info h4{font-size:.85rem;color:var(--text);line-height:1.3;margin-bottom:.2rem}
+    .related-info span{font-size:.75rem;color:var(--text-light)}
+
+    #page-loading{position:fixed;inset:0;background:var(--beige);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem}
+    #page-loading span{font-size:3rem;animation:float 1.5s ease-in-out infinite}
+    #page-loading p{font-family:'Baloo 2',cursive;font-size:1.2rem;color:var(--blue-dark)}
+
+    .not-found{text-align:center;padding:4rem 2rem}
+    .not-found h2{color:var(--blue-dark);margin-bottom:1rem}
+    .not-found p{color:var(--text-light);margin-bottom:2rem}
+
+    @media(max-width:700px){
+      nav ul{display:none}
+      .hamburger{display:flex}
+    }
+    @media(max-width:600px){
+      .related-grid{grid-template-columns:1fr}
+      .story-nav{flex-direction:column}
+      .btn-story-nav{flex:none;width:100%}
+      .story-banner{padding:2rem 1rem 1.5rem}
+    }
+  </style>
+</head>
+<body>
+
+<div id="page-loading"><span>📖</span><p>Carregando...</p></div>
+
+<nav>
+  <a class="logo" href="/index.html">
+    <span class="logo-icon"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"/></span>
+    <div class="logo-text">Tesouros da<br><span>Bíblia Kids</span></div>
+  </a>
+  <ul>
+    <li><a href="/sumario.html">📋 Sumário</a></li>
+    <li><a href="/index.html">🏠 Início</a></li>
+    <li><div class="nav-user" id="nav-user-area"><!-- preenchido pelo JS --></div></li>
+  </ul>
+  <div class="hamburger" id="hamburgerBtn" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav" onclick="closeMobileOnOverlay(event)">
+  <div class="mobile-nav-inner">
+    <a href="/sumario.html" onclick="closeMenu()">📋 Sumário</a>
+    <a href="/index.html" onclick="closeMenu()">🏠 Início</a>
+    <div id="mobile-user-area"><!-- preenchido pelo JS --></div>
+  </div>
+</div>
+
+<div id="storyContent"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/stories.js"></script>
+<script src="/auth.js"></script>
+<script>
+stories.sort(function(a,b){ return a.id - b.id; });
+
+var _storyReadState = false;
+var _currentStoryId = null;
+
+(async function() {
+  var ok = await requireAccess();
+  if (!ok) return;
+
+  // Monta nav-user-area (desktop) e mobile-user-area
+  var profile = await getProfile();
+  var nome = (profile && profile.nome) ? profile.nome.split(' ')[0] : '';
+  var role = profile ? profile.role : 'user';
+  var painelDest  = role === 'super' ? '/super.html' : (role === 'admin' ? '/admin.html' : '');
+  var painelLabel = role === 'super' ? '⚙️ Painel' : '⛪ Painel';
+
+  var area = document.getElementById('nav-user-area');
+  if (area) {
+    area.style.display = 'inline-flex';
+    area.style.alignItems = 'center';
+    area.style.gap = '.5rem';
+    area.innerHTML = '';
+    if (painelDest) {
+      var bp = document.createElement('button');
+      bp.className = 'btn-painel';
+      bp.textContent = painelLabel;
+      bp.onclick = function(){ window.location.href = painelDest; };
+      area.appendChild(bp);
+    }
+    if (nome) {
+      var sn = document.createElement('span');
+      sn.className = 'nav-user-name';
+      sn.textContent = nome;
+      area.appendChild(sn);
+    }
+    var bl = document.createElement('button');
+    bl.className = 'btn-logout';
+    bl.textContent = 'Sair';
+    bl.onclick = function(){ signOut(); };
+    area.appendChild(bl);
+  }
+
+  // Mobile user area
+  var mArea = document.getElementById('mobile-user-area');
+  if (mArea) {
+    mArea.innerHTML = '';
+    if (painelDest) {
+      var mbp = document.createElement('a');
+      mbp.textContent = painelLabel;
+      mbp.onclick = function(){ window.location.href = painelDest; closeMenu(); };
+      mArea.appendChild(mbp);
+    }
+    var mbl = document.createElement('a');
+    mbl.textContent = '🚪 Sair';
+    mbl.onclick = function(){ signOut(); };
+    mArea.appendChild(mbl);
+  }
+
+  var storyId = parseInt(new URLSearchParams(window.location.search).get('id')) || 1;
+  _currentStoryId = storyId;
+
+  var found = null;
+  for (var i=0; i<stories.length; i++) { if (stories[i].id===storyId) { found=stories[i]; break; } }
+
+  // Verifica se já foi lida
+  _storyReadState = await isReadCloud(storyId);
+
+  render(found);
+  document.getElementById('page-loading').style.display = 'none';
+})();
+
+async function doToggleRead(id) {
+  var btn = document.getElementById('markBtn');
+  if (btn) btn.disabled = true;
+  var novo = await toggleReadCloud(id);
+  _storyReadState = novo;
+  updateMarkBtn(id);
+  if (btn) btn.disabled = false;
+}
+
+function updateMarkBtn(id) {
+  var btn = document.getElementById('markBtn');
+  if (!btn) return;
+  if (_storyReadState) { btn.textContent = '✨ Brilhou! — Lida'; btn.classList.add('is-read'); }
+  else                 { btn.textContent = '☆ Marcar como Lida'; btn.classList.remove('is-read'); }
+}
+
+function goToStory(id) { window.location.href = '/story.html?id=' + id; }
+
+var bannerClass = { t1:'banner-t1', t2:'banner-t2', t3:'banner-t3', t4:'banner-t4', t5:'banner-t5' };
+
+function render(s) {
+  if (!s) {
+    document.getElementById('storyContent').innerHTML =
+      '<div class="not-found"><h2>😔 História não encontrada</h2>' +
+      '<p>A história que você procura não existe.</p>' +
+      '<a href="/index.html" class="btn-story-nav center" style="display:inline-flex;max-width:220px;margin:2rem auto">← Voltar ao início</a></div>';
+    return;
+  }
+
+  document.title = s.title + ' — Tesouros da Bíblia Kids';
+
+  var idx = -1;
+  for (var i=0; i<stories.length; i++) { if (stories[i].id===s.id) { idx=i; break; } }
+  var prev = idx > 0 ? stories[idx-1] : null;
+  var next = idx < stories.length-1 ? stories[idx+1] : null;
+
+  // Relacionadas (mesma categoria, aleatórias, máx 4)
+  var pool = [];
+  for (var i=0; i<stories.length; i++) {
+    if (stories[i].category===s.category && stories[i].id!==s.id) pool.push(stories[i]);
+  }
+  pool.sort(function(){ return Math.random()-.5; });
+  var related = pool.slice(0,4);
+
+  var bc = bannerClass[s.thumb] || 'banner-t1';
+  var storyParas = '';
+  for (var i=0; i<s.story.length; i++) storyParas += '<p>' + s.story[i] + '</p>';
+  var lessonItems = '';
+  for (var i=0; i<s.lesson.length; i++) lessonItems += '<li>' + s.lesson[i] + '</li>';
+
+  var prevBtn = prev
+    ? '<button class="btn-story-nav" onclick="goToStory(' + prev.id + ')">← ' + prev.title + '</button>'
+    : '<button class="btn-story-nav" disabled>← Primeira história</button>';
+  var nextBtn = next
+    ? '<button class="btn-story-nav" onclick="goToStory(' + next.id + ')">' + next.title + ' →</button>'
+    : '<button class="btn-story-nav" disabled>Última história →</button>';
+
+  var relatedHtml = '';
+  if (related.length) {
+    relatedHtml = '<div class="related-section"><h3>📚 Mais de ' + s.category + '</h3><div class="related-grid">';
+    for (var i=0; i<related.length; i++) {
+      var r = related[i];
+      relatedHtml += '<a class="related-card" href="story.html?id=' + r.id + '">' +
+        '<span class="related-emoji">' + r.emoji + '</span>' +
+        '<div class="related-info"><h4>' + r.title + '</h4><span>📖 ' + r.ref + '</span></div>' +
+        '</a>';
+    }
+    relatedHtml += '</div></div>';
+  }
+
+  var markLabel = _storyReadState ? '✨ Brilhou! — Lida' : '☆ Marcar como Lida';
+  var markCls   = _storyReadState ? ' is-read' : '';
+
+  document.getElementById('storyContent').innerHTML =
+    '<div class="story-banner ' + bc + '">' +
+      '<span class="story-emoji-big">' + s.emoji + '</span>' +
+      '<h1>' + s.title + '</h1>' +
+      '<div><span class="story-ref-tag">📖 ' + s.ref + '</span>' +
+      '<span class="story-cat-tag">' + s.category + '</span></div>' +
+    '</div>' +
+    '<div class="story-container">' +
+      '<div class="story-text">' + storyParas + '</div>' +
+      '<div class="lesson-box"><h3>🌟 O que aprendemos com essa história?</h3><ul>' + lessonItems + '</ul></div>' +
+      '<div class="mark-read-wrap">' +
+        '<button class="btn-mark' + markCls + '" id="markBtn" onclick="doToggleRead(' + s.id + ')">' + markLabel + '</button>' +
+      '</div>' +
+      '<div class="story-nav">' + prevBtn + '<a class="btn-story-nav center" href="/sumario.html">📋</a>' + nextBtn + '</div>' +
+      relatedHtml +
+    '</div>';
+}
+
+function toggleMenu() { document.getElementById('mobileNav').classList.toggle('open'); }
+function closeMenu()  { document.getElementById('mobileNav').classList.remove('open'); }
+function closeMobileOnOverlay(e) { if (e.target===document.getElementById('mobileNav')) closeMenu(); }
+</script>
+<script src="/whatsapp-btn.js"></script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Aceitar Convite — Palavra Viva</title>
+  <meta name="theme-color" content="#0a0a0a"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/logo.png"/>
+  <link rel="icon" href="/logo.png" type="image/png"/>
+  <link rel="shortcut icon" href="/logo.png" type="image/png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:         #0a0a0a;
+      --bg2:        #111111;
+      --bg3:        #181818;
+      --bg4:        #1f1f1f;
+      --gold:       #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim:   #7a6128;
+      --cream:      #f0e6d0;
+      --cream-dim:  #a89880;
+      --text:       #e8e0d4;
+      --text-muted: #7a7060;
+      --border:     rgba(201,168,76,0.15);
+      --border-soft:rgba(255,255,255,0.06);
+      --green:      #4a9e6a;
+      --red:        #c0392b;
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; width: 100%; max-width: 440px;
+      overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+      position: relative; z-index: 1;
+    }
+
+    .card-top {
+      background:
+        radial-gradient(ellipse 80% 100% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%),
+        var(--bg3);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 1.8rem 1.6rem; text-align: center;
+    }
+    .brand-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      border-radius: 10px; margin: 0 auto 0.8rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: var(--bg);
+    }
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 400; color: var(--cream); margin-bottom: 0.5rem;
+    }
+    .brand-name em { color: var(--gold); font-style: italic; }
+    .card-top h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 400; color: var(--cream); margin-bottom: 0.2rem;
+    }
+    .card-top p { font-size: 0.78rem; color: var(--text-muted); font-weight: 300; }
+
+    .body { padding: 1.6rem 1.5rem; }
+
+    /* Estados */
+    .state { display: none; text-align: center; }
+    .state.on { display: block; }
+    .state-ico { font-size: 2.5rem; display: block; margin-bottom: 0.6rem; }
+    .state h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 400; color: var(--cream); margin-bottom: 0.4rem;
+    }
+    .state p { color: var(--text-muted); font-size: 0.82rem; line-height: 1.7; margin-bottom: 1.1rem; font-weight: 300; }
+
+    /* Loading */
+    .spinner-big {
+      width: 44px; height: 44px;
+      border: 3px solid var(--border-soft);
+      border-top-color: var(--gold);
+      border-radius: 50%; animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Sucesso */
+    @keyframes popIn { 0%{transform:scale(.5);opacity:0} 80%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+    .success-ring {
+      width: 56px; height: 56px; margin: 0 auto 1.2rem;
+      background: rgba(74,158,106,0.1); border: 1px solid rgba(74,158,106,0.3);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; animation: popIn 0.5s ease;
+    }
+
+    .plano-badge {
+      display: inline-block; padding: 0.3rem 0.9rem;
+      border: 1px solid var(--border); border-radius: 4px;
+      font-size: 0.78rem; font-weight: 500; color: var(--gold);
+      background: rgba(201,168,76,0.06); margin: 0.4rem 0 0.8rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* Botão */
+    .btn {
+      width: 100%; padding: 0.85rem; border: none; border-radius: 6px;
+      font-weight: 600; font-size: 0.78rem; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all 0.2s; margin-top: 0.3rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .btn-gold { background: var(--gold); color: var(--bg); }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.25); }
+    .btn-out { background: transparent; border: 1px solid var(--border-soft); color: var(--text-muted); margin-top: 0.5rem; }
+    .btn-out:hover { border-color: var(--border); color: var(--cream-dim); }
+
+    /* Form login/cadastro */
+    .tabs {
+      display: flex; background: var(--bg4);
+      border: 1px solid var(--border-soft); border-radius: 6px;
+      padding: 3px; margin-bottom: 1rem;
+    }
+    .tab {
+      flex: 1; padding: 0.45rem; border: none; background: transparent;
+      color: var(--text-muted); font-weight: 500; font-size: 0.75rem;
+      border-radius: 4px; cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', sans-serif; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .tab.active { background: var(--bg2); color: var(--gold); }
+
+    .form-group { margin-bottom: 0.85rem; }
+    .form-group label {
+      display: block; font-weight: 600; font-size: 0.68rem; color: var(--text-muted);
+      margin-bottom: 0.35rem; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .form-group input {
+      width: 100%; padding: 0.68rem 0.95rem;
+      background: var(--bg4); border: 1px solid var(--border-soft);
+      border-radius: 6px; color: var(--text);
+      font-size: 0.88rem; font-family: 'Inter', sans-serif; outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input::placeholder { color: var(--text-muted); }
+    .form-group input:focus { border-color: var(--gold-dim); }
+
+    .msg {
+      padding: 0.6rem 0.9rem; border-radius: 6px; font-size: 0.78rem;
+      font-weight: 500; margin-bottom: 0.8rem; display: none;
+    }
+    .msg.err { background: rgba(192,57,43,0.12); color: #e07060; border: 1px solid rgba(192,57,43,0.25); display: block; }
+    .msg.ok  { background: rgba(74,158,106,0.12); color: #6abf88; border: 1px solid rgba(74,158,106,0.25); display: block; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .sp { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(10,10,10,0.3); border-top-color: var(--bg); border-radius: 50%; animation: spin .7s linear infinite; margin-right: 4px; vertical-align: middle; }
+
+    .footer { text-align: center; color: var(--text-muted); font-size: 0.72rem; margin-top: 1rem; position: relative; z-index: 1; font-weight: 300; letter-spacing: 0.04em; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="card-top">
+    <div class="brand-icon">✦</div>
+    <div class="brand-name">Palavra <em>Viva</em></div>
+    <h2>Você foi convidado!</h2>
+    <p>Entre ou crie sua conta para aceitar o convite</p>
+  </div>
+  <div class="body">
+
+    <!-- Estado: verificando token -->
+    <div class="state on" id="st-loading">
+      <div class="spinner-big"></div>
+      <p>Verificando convite...</p>
+    </div>
+
+    <!-- Estado: inválido/expirado -->
+    <div class="state" id="st-invalido">
+      <span class="state-ico">😔</span>
+      <h3>Convite inválido</h3>
+      <p id="msg-invalido">Este link de convite é inválido ou já foi utilizado.</p>
+      <button class="btn btn-out" onclick="window.location.href='/index.html'">Ir para o site</button>
+    </div>
+
+    <!-- Estado: precisa logar -->
+    <div class="state" id="st-auth">
+      <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;font-weight:300">
+        Para aceitar o convite, entre com sua conta ou crie uma nova:
+      </p>
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('entrar')">Entrar</button>
+        <button class="tab" onclick="showTab('criar')">Criar Conta</button>
+      </div>
+      <!-- Entrar -->
+      <div id="panel-entrar" class="panel active">
+        <div class="msg" id="msg-entrar"></div>
+        <div class="form-group"><label>E-mail</label><input type="email" id="e-email" placeholder="seu@email.com" autocomplete="email"/></div>
+        <div class="form-group"><label>Senha</label><input type="password" id="e-senha" placeholder="Sua senha" autocomplete="current-password"/></div>
+        <button class="btn btn-gold" id="btn-entrar" onclick="doLogin()">Entrar e Aceitar</button>
+      </div>
+      <!-- Criar -->
+      <div id="panel-criar" class="panel">
+        <div class="msg" id="msg-criar"></div>
+        <div class="form-group"><label>Seu nome</label><input type="text" id="c-nome" placeholder="Seu nome completo" autocomplete="name"/></div>
+        <div class="form-group"><label>E-mail</label><input type="email" id="c-email" placeholder="seu@email.com" autocomplete="email"/></div>
+        <div class="form-group"><label>Senha</label><input type="password" id="c-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/></div>
+        <button class="btn btn-gold" id="btn-criar" onclick="doCadastro()">Criar Conta e Aceitar</button>
+      </div>
+    </div>
+
+    <!-- Estado: sucesso -->
+    <div class="state" id="st-ok">
+      <div class="success-ring">✦</div>
+      <h3 style="color:var(--green)">Convite aceito!</h3>
+      <div class="plano-badge" id="ok-plano"></div>
+      <p id="ok-msg">Você agora tem acesso ao Palavra Viva. Aproveite os 1.160 devocionais!</p>
+      <button class="btn btn-gold" onclick="window.location.href='/index.html'">Começar a Ler →</button>
+    </div>
+
+  </div>
+</div>
+<div class="footer">Palavra Viva · feito para edificar · com ❤️</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<script>
+var _token     = null;
+var _licencaId = null;
+
+(async function(){
+  var params = new URLSearchParams(window.location.search);
+  _token     = params.get('token');
+  _licencaId = params.get('licenca');
+
+  if (!_token && !_licencaId) {
+    _token     = sessionStorage.getItem('convite_token')   || null;
+    _licencaId = sessionStorage.getItem('convite_licenca') || null;
+  }
+
+  if (!_token && !_licencaId) {
+    mostrar('st-invalido');
+    document.getElementById('msg-invalido').textContent = 'Link inválido — token não encontrado.';
+    return;
+  }
+
+  var r = _token ? await aceitarConvite(_token) : await aceitarPorLicenca(_licencaId);
+
+  if (r.ok) {
+    sessionStorage.removeItem('convite_token');
+    sessionStorage.removeItem('convite_licenca');
+    mostrarSucesso(r.licenca);
+    return;
+  }
+
+  if (r.redirect === 'login') {
+    mostrar('st-auth');
+    return;
+  }
+
+  mostrar('st-invalido');
+  document.getElementById('msg-invalido').textContent = r.msg;
+})();
+
+function mostrar(id) {
+  document.querySelectorAll('.state').forEach(function(s){ s.classList.remove('on'); });
+  document.getElementById(id).classList.add('on');
+}
+
+function mostrarSucesso(lic) {
+  mostrar('st-ok');
+  if (lic) {
+    document.getElementById('ok-plano').textContent = lic.nome || tipoLabel(lic.tipo);
+    document.getElementById('ok-msg').textContent =
+      'Você agora faz parte de "' + lic.nome + '". Aproveite os 1.160 devocionais!';
+  }
+}
+
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach(function(b, i){
+    b.classList.toggle('active', (t==='entrar'&&i===0)||(t==='criar'&&i===1));
+  });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('panel-'+t).classList.add('active');
+}
+
+function load(id, on, txt) {
+  var b = document.getElementById(id);
+  b.disabled = on;
+  b.innerHTML = on ? '<span class="sp"></span>Aguarde...' : txt;
+}
+function msg(id, t, c) {
+  var e = document.getElementById(id);
+  e.textContent = t; e.className = 'msg ' + c;
+}
+
+async function doLogin() {
+  var email = document.getElementById('e-email').value.trim();
+  var senha = document.getElementById('e-senha').value;
+  if (!email || !senha) { msg('msg-entrar','Preencha e-mail e senha.','err'); return; }
+  load('btn-entrar', true, 'Entrar e Aceitar');
+  var r = await signIn(email, senha);
+  if (!r.ok) { msg('msg-entrar', r.msg, 'err'); load('btn-entrar', false, 'Entrar e Aceitar'); return; }
+  var ra = _token ? await aceitarConvite(_token) : await aceitarPorLicenca(_licencaId);
+  if (!ra.ok) { msg('msg-entrar', ra.msg, 'err'); load('btn-entrar', false, 'Entrar e Aceitar'); return; }
+  sessionStorage.removeItem('convite_token'); sessionStorage.removeItem('convite_licenca');
+  mostrarSucesso(ra.licenca);
+}
+
+async function doCadastro() {
+  var nome  = document.getElementById('c-nome').value.trim();
+  var email = document.getElementById('c-email').value.trim();
+  var senha = document.getElementById('c-senha').value;
+  if (!nome || !email || !senha) { msg('msg-criar','Preencha todos os campos.','err'); return; }
+  if (senha.length < 6) { msg('msg-criar','A senha deve ter pelo menos 6 caracteres.','err'); return; }
+  load('btn-criar', true, 'Criar Conta e Aceitar');
+  var r = await signUp(email, senha, nome);
+  if (!r.ok) { msg('msg-criar', r.msg, 'err'); load('btn-criar', false, 'Criar Conta e Aceitar'); return; }
+  var rl = await signIn(email, senha);
+  if (!rl.ok) { msg('msg-criar','Conta criada! Tente entrar manualmente.','ok'); load('btn-criar', false, 'Criar Conta e Aceitar'); return; }
+  var ra = _token ? await aceitarConvite(_token) : await aceitarPorLicenca(_licencaId);
+  if (!ra.ok) { msg('msg-criar', ra.msg, 'err'); load('btn-criar', false, 'Criar Conta e Aceitar'); return; }
+  sessionStorage.removeItem('convite_token'); sessionStorage.removeItem('convite_licenca');
+  mostrarSucesso(ra.licenca);
+}
+</script>
+<script src="/whatsapp-btn.js"></script>
+</body>
+</html>
