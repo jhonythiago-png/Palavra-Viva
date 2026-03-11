@@ -6,8 +6,8 @@
 // ── CONFIGURAÇÃO SUPABASE ──────────────────────────────────
 // Substitua pelos seus valores do painel Supabase
 // (Settings → API → Project URL e anon public key)
-var SUPABASE_URL = 'COLE_SUA_URL_AQUI';
-var SUPABASE_KEY = 'COLE_SUA_CHAVE_ANON_AQUI';
+   var SUPABASE_URL = 'https://pdrixknquouucinditvc.supabase.co';
+   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkcml4a25xdW91dWNpbmRpdHZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNTgxNDYsImV4cCI6MjA4ODgzNDE0Nn0.w7eFutYxqjuG6MLPh8wHojqAn924HTCthoIBUzqtG2s';
 
 // ── CONTATO WHATSAPP ───────────────────────────────────────
 // Número gerenciado pelo painel super.html — não edite aqui
