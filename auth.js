@@ -75,7 +75,7 @@ async function getProfile() {
 
 async function requireAuth(redirect) {
   var session = await getSession();
-  if (!session) { window.location.href = redirect || 'login.html'; return null; }
+  if (!session) { window.location.href = redirect || '/login.html'; return null; }
   return session;
 }
 
@@ -137,7 +137,7 @@ async function redirectByRole() {
   if (profile.role === ROLES.SUPER) { window.location.href = '/super.html'; return; }
   if (profile.role === ROLES.ADMIN) { window.location.href = '/admin.html'; return; }
   var ok = await hasActiveAccess(profile);
-  window.location.href = ok ? 'index.html' : 'ativar.html';
+  window.location.href = ok ? '/index.html' : '/ativar.html';
 }
 
 // ══════════════════════════════════════════════════════════
