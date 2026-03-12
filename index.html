@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Palavra Viva — Devocional Diário</title>
+  <meta name="theme-color" content="#0d0d0d"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Palavra Viva"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/logo.png"/>
+  <link rel="icon" href="/logo.png" type="image/png"/>
+  <link rel="shortcut icon" href="/logo.png" type="image/png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:          #0a0a0a;
+      --bg2:         #111111;
+      --bg3:         #181818;
+      --bg4:         #1f1f1f;
+      --gold:        #c9a84c;
+      --gold-light:  #e8c97a;
+      --gold-dim:    #7a6128;
+      --cream:       #f0e6d0;
+      --cream-dim:   #a89880;
+      --text:        #e8e0d4;
+      --text-muted:  #7a7060;
+      --border:      rgba(201,168,76,0.15);
+      --border-soft: rgba(255,255,255,0.06);
+      --shadow-gold: 0 0 40px rgba(201,168,76,0.08);
+      --shadow-card: 0 8px 40px rgba(0,0,0,0.6);
+      --r:           14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── TEXTURA SUTIL ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(201,168,76,0.04) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='none'/%3E%3Ccircle cx='1' cy='1' r='.5' fill='rgba(255,255,255,0.015)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── LOADING ── */
+    #page-loading {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1.5rem;
+    }
+    .loading-cross {
+      width: 40px; height: 40px;
+      position: relative;
+      animation: rotateCross 3s linear infinite;
+    }
+    .loading-cross::before, .loading-cross::after {
+      content: ''; position: absolute;
+      background: var(--gold); border-radius: 2px;
+    }
+    .loading-cross::before { width: 4px; height: 40px; left: 18px; top: 0; }
+    .loading-cross::after  { width: 40px; height: 4px; left: 0; top: 18px; }
+    @keyframes rotateCross { to { transform: rotate(360deg); } }
+    #page-loading p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; color: var(--cream-dim);
+      letter-spacing: 0.15em; text-transform: uppercase;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(20px) saturate(1.2);
+      border-bottom: 1px solid var(--border);
+      height: 68px;
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; cursor: pointer; flex-shrink: 0;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem; font-weight: 600;
+      color: var(--cream); line-height: 1.1; letter-spacing: 0.01em;
+    }
+    .logo-text em { color: var(--gold); font-style: italic; }
+
+    nav ul {
+      list-style: none; display: flex; gap: 2rem; align-items: center;
+    }
+    nav ul a {
+      text-decoration: none; color: var(--cream-dim);
+      font-size: 0.82rem; font-weight: 500; letter-spacing: 0.06em;
+      text-transform: uppercase; cursor: pointer;
+      transition: color 0.2s;
+    }
+    nav ul a:hover { color: var(--gold-light); }
+
+    .nav-cta {
+      background: transparent !important;
+      border: 1px solid var(--gold) !important;
+      color: var(--gold) !important;
+      padding: 0.4rem 1.1rem;
+      border-radius: 4px;
+      font-size: 0.78rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.08em !important;
+      text-transform: uppercase !important;
+      cursor: pointer;
+      transition: all 0.2s !important;
+    }
+    .nav-cta:hover {
+      background: var(--gold) !important;
+      color: var(--bg) !important;
+    }
+
+    .nav-user { display: flex; align-items: center; gap: 0.7rem; }
+    .nav-user-name {
+      font-size: 0.8rem; color: var(--cream-dim); font-weight: 500;
+      max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .btn-logout {
+      background: transparent; color: #b04040;
+      border: 1px solid rgba(176,64,64,0.4);
+      border-radius: 4px; padding: 0.3rem 0.8rem;
+      font-weight: 500; font-size: 0.75rem; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(176,64,64,0.15); border-color: #b04040; }
+
+    .btn-painel {
+      background: transparent; color: var(--gold) !important;
+      border: 1px solid var(--gold-dim) !important;
+      border-radius: 4px; padding: 0.3rem 0.8rem;
+      font-weight: 600; font-size: 0.75rem; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .btn-painel:hover { background: rgba(201,168,76,0.1) !important; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { width: 22px; height: 2px; background: var(--cream-dim); display: block; transition: all 0.3s; }
+
+    .mobile-nav {
+      display: none; position: fixed;
+      top: 68px; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); z-index: 190;
+      backdrop-filter: blur(4px);
+    }
+    .mobile-nav.open { display: block; }
+    .mobile-nav-inner {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column;
+    }
+    .mobile-nav-inner a {
+      display: block; padding: 1rem 1.5rem;
+      color: var(--text); font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px solid var(--border-soft);
+      font-size: 0.95rem; cursor: pointer;
+      transition: color 0.2s;
+    }
+    .mobile-nav-inner a:hover { color: var(--gold-light); }
+
+    /* ── BANNER UPGRADE ── */
+    .banner-upgrade {
+      background: linear-gradient(90deg, rgba(201,168,76,0.08), rgba(201,168,76,0.04));
+      border-bottom: 1px solid var(--border);
+      color: var(--cream-dim); padding: 0.6rem 1.5rem;
+      text-align: center; font-size: 0.82rem; display: none;
+    }
+    .banner-upgrade a {
+      color: var(--gold); text-decoration: underline;
+      cursor: pointer; margin-left: 6px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; overflow: hidden;
+      padding: 7rem 2rem 5rem;
+      text-align: center;
+      background:
+        radial-gradient(ellipse 60% 60% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%),
+        var(--bg);
+    }
+
+    .hero-ornament {
+      position: absolute; top: 2rem; left: 50%;
+      transform: translateX(-50%);
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--gold-dim));
+    }
+    .hero-ornament::after {
+      content: '✦';
+      position: absolute; bottom: -10px; left: 50%;
+      transform: translateX(-50%);
+      color: var(--gold-dim); font-size: 0.7rem;
+    }
+
+    .hero-date {
+      font-size: 0.72rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 1.5rem; display: block;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-weight: 300; line-height: 1.05;
+      color: var(--cream); letter-spacing: -0.01em;
+      margin-bottom: 0.3rem;
+    }
+    .hero h1 em {
+      font-style: italic; color: var(--gold);
+      font-weight: 400;
+    }
+
+    .hero-tagline {
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      color: var(--text-muted); font-weight: 300;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-verse-block {
+      max-width: 540px; margin: 0 auto 3rem;
+      border-left: 2px solid var(--gold-dim);
+      padding: 1.2rem 1.5rem; text-align: left;
+      background: rgba(201,168,76,0.03);
+      border-radius: 0 8px 8px 0;
+    }
+    .hero-verse-block blockquote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+      font-style: italic; font-weight: 300;
+      color: var(--cream); line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .hero-verse-block cite {
+      font-size: 0.8rem; color: var(--gold);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      font-style: normal;
+    }
+
+    .hero-btns {
+      display: flex; gap: 1rem;
+      justify-content: center; flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn {
+      display: inline-block; padding: 0.85rem 2rem;
+      font-size: 0.82rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      border-radius: 4px; cursor: pointer;
+      text-decoration: none; border: none;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.25s;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: var(--bg);
+    }
+    .btn-primary:hover {
+      background: var(--gold-light);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--cream-dim);
+      border: 1px solid var(--border-soft);
+    }
+    .btn-secondary:hover {
+      border-color: var(--gold-dim);
+      color: var(--gold-light);
+      transform: translateY(-1px);
+    }
+
+    .search-bar {
+      display: flex; max-width: 440px; margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 4px; overflow: hidden;
+      background: var(--bg2);
+    }
+    .search-bar input {
+      flex: 1; padding: 0.85rem 1.2rem;
+      background: transparent; border: none;
+      color: var(--text); font-size: 0.9rem;
+      font-family: 'Inter', sans-serif; outline: none;
+    }
+    .search-bar input::placeholder { color: var(--text-muted); }
+    .search-bar button {
+      padding: 0.85rem 1.2rem;
+      background: var(--bg3); color: var(--gold);
+      border: none; border-left: 1px solid var(--border);
+      font-weight: 600; cursor: pointer;
+      font-size: 0.8rem; letter-spacing: 0.06em;
+      text-transform: uppercase; font-family: 'Inter', sans-serif;
+      transition: background 0.2s;
+    }
+    .search-bar button:hover { background: rgba(201,168,76,0.1); }
+
+    /* ── TAGS ── */
+    .tags-bar {
+      padding: 0.75rem 2rem;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border-soft);
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+      justify-content: center;
+    }
+    .tag {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-soft);
+      padding: 0.3rem 0.9rem;
+      border-radius: 20px; font-size: 0.75rem;
+      font-weight: 500; letter-spacing: 0.04em;
+    }
+
+    /* ── SEÇÃO WRAPPER ── */
+    .section {
+      padding: 5rem 2rem;
+      position: relative; z-index: 1;
+    }
+    .section-alt { background: var(--bg2); }
+    .container { max-width: 1080px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.68rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 0.6rem; display: flex;
+      align-items: center; gap: 0.6rem;
+    }
+    .section-label::before, .section-label::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 400; color: var(--cream);
+      text-align: center; margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+    .section-sub {
+      text-align: center; color: var(--text-muted);
+      font-size: 0.88rem; margin-bottom: 3rem;
+      font-weight: 300; letter-spacing: 0.02em;
+    }
+
+    /* ── CATEGORIAS ── */
+    .cats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 1px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r);
+      overflow: hidden;
+      background: var(--border-soft);
+    }
+    .cat-card {
+      background: var(--bg3);
+      padding: 1.8rem 1.2rem;
+      text-align: center; cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.7rem;
+      transition: background 0.2s;
+    }
+    .cat-card:hover { background: var(--bg4); }
+    .cat-card:hover .cat-name { color: var(--gold-light); }
+    .cat-icon { font-size: 1.8rem; line-height: 1; }
+    .cat-name {
+      font-size: 0.82rem; font-weight: 500;
+      color: var(--cream-dim); letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+
+    /* ── DESTAQUES ── */
+    .stories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .story-card {
+      background: var(--bg3);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r); overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+      display: flex; flex-direction: column;
+      cursor: pointer;
+    }
+    .story-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border);
+      box-shadow: var(--shadow-gold);
+    }
+
+    .story-thumb {
+      height: 90px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .t1 { background: linear-gradient(135deg, #1a1208, #2a1e0a); }
+    .t2 { background: linear-gradient(135deg, #0f1a10, #162415); }
+    .t3 { background: linear-gradient(135deg, #0e0e1e, #161630); }
+    .t4 { background: linear-gradient(135deg, #1e0e0e, #2a1010); }
+    .t5 { background: linear-gradient(135deg, #0e1a1a, #122020); }
+
+    .story-body {
+      padding: 1.4rem 1.4rem 1.2rem;
+      flex: 1; display: flex; flex-direction: column;
+    }
+    .story-body h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600;
+      color: var(--cream); margin-bottom: 0.5rem;
+      line-height: 1.3; letter-spacing: 0.01em;
+    }
+    .story-body p {
+      font-size: 0.84rem; color: var(--text-muted);
+      flex: 1; line-height: 1.65; margin-bottom: 1rem;
+      font-weight: 300;
+    }
+    .ref {
+      font-size: 0.73rem; color: var(--gold-dim);
+      font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 0.9rem;
+    }
+    .read-btn {
+      background: transparent; color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      border-radius: 4px; padding: 0.5rem 1rem;
+      font-weight: 600; cursor: pointer;
+      font-size: 0.78rem; letter-spacing: 0.07em;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s; width: 100%;
+    }
+    .read-btn:hover {
+      background: var(--gold);
+      color: var(--bg);
+    }
+
+    .story-read-badge {
+      font-size: 0.85rem; margin-left: 0.4rem;
+    }
+
+    /* Cadeado */
+    .story-card.locked {
+      opacity: 0.6; cursor: pointer;
+      position: relative;
+    }
+    .story-card.locked .read-btn { display: none; }
+    .story-card.locked::after {
+      content: '🔒';
+      position: absolute; top: 10px; right: 10px;
+      font-size: 0.85rem;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%; width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .story-card.locked .story-body::after {
+      content: 'Acesse o plano completo para ler';
+      display: block; font-size: 0.7rem;
+      color: var(--text-muted); font-weight: 500;
+      margin-top: 0.4rem;
+      border: 1px solid var(--border-soft);
+      padding: 4px 8px; border-radius: 4px;
+      text-align: center; letter-spacing: 0.03em;
+    }
+
+    /* ── SEARCH RESULTS ── */
+    #search-results { display: none; padding: 3rem 2rem; }
+    #search-results.visible { display: block; }
+    #search-results .container h2 {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--cream); font-size: 1.6rem;
+      font-weight: 400; margin-bottom: 2rem;
+    }
+
+    /* ── VERSÍCULO DESTAQUE ── */
+    .verse-section {
+      padding: 6rem 2rem;
+      background: var(--bg);
+      position: relative; overflow: hidden;
+    }
+    .verse-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 80% at 50% 50%, rgba(201,168,76,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .verse-section .container {
+      text-align: center; position: relative;
+    }
+    .verse-ornament {
+      font-size: 4rem; opacity: 0.06;
+      position: absolute; top: -2rem; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold); user-select: none;
+      letter-spacing: -0.05em;
+    }
+    .verse-section blockquote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 3.5vw, 2rem);
+      font-style: italic; font-weight: 300;
+      color: var(--cream); line-height: 1.6;
+      max-width: 720px; margin: 0 auto 1.2rem;
+      position: relative; z-index: 1;
+    }
+    .verse-section cite {
+      font-size: 0.8rem; color: var(--gold);
+      letter-spacing: 0.12em; text-transform: uppercase;
+      font-style: normal;
+    }
+
+    /* ── PILARES ── */
+    .pilares-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .pilar-card {
+      background: var(--bg3);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r); padding: 2rem 1.6rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .pilar-card:hover {
+      border-color: var(--border);
+      background: var(--bg4);
+    }
+    .pilar-card:hover .pilar-title { color: var(--gold-light); }
+    .pilar-icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; }
+    .pilar-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 600;
+      color: var(--cream); margin-bottom: 0.6rem;
+      transition: color 0.2s;
+    }
+    .pilar-desc {
+      font-size: 0.84rem; color: var(--text-muted);
+      line-height: 1.6; font-weight: 300;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border-soft);
+      padding: 3rem 2rem; text-align: center;
+    }
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; color: var(--cream);
+      font-weight: 600; margin-bottom: 0.5rem;
+      letter-spacing: 0.03em;
+    }
+    .footer-logo em { color: var(--gold); font-style: italic; }
+    footer p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.8; max-width: 420px; margin: 0 auto; font-weight: 300; }
+    .footer-dev { margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-muted); opacity: 0.5; }
+    .footer-dev strong { color: var(--gold); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000; display: none;
+      align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      max-width: 580px; width: 100%;
+      max-height: 88vh; overflow-y: auto;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8), var(--shadow-gold);
+    }
+    .modal::-webkit-scrollbar { width: 4px; }
+    .modal::-webkit-scrollbar-track { background: transparent; }
+    .modal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .modal-close {
+      position: absolute; top: 1.2rem; right: 1.2rem;
+      background: var(--bg3); border: 1px solid var(--border-soft);
+      color: var(--cream-dim); border-radius: 50%;
+      width: 34px; height: 34px; font-size: 0.9rem;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: all 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .modal-close:hover { border-color: var(--border); color: var(--cream); }
+
+    .modal-emoji {
+      font-size: 2.2rem; display: block;
+      text-align: center; margin-bottom: 1rem;
+    }
+    .modal h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; font-weight: 600;
+      color: var(--cream); text-align: center;
+      margin-bottom: 0.4rem; letter-spacing: 0.01em;
+    }
+    .modal-ref {
+      text-align: center; color: var(--gold);
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 1.8rem;
+    }
+    .modal-story p {
+      font-size: 0.96rem; line-height: 1.9;
+      color: var(--text); margin-bottom: 0.9rem;
+      font-weight: 300;
+    }
+    .modal-lesson {
+      background: rgba(201,168,76,0.04);
+      border-left: 2px solid var(--gold-dim);
+      border-radius: 0 8px 8px 0;
+      padding: 1.3rem 1.4rem; margin-top: 1.8rem;
+    }
+    .modal-lesson h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem; font-weight: 600;
+      color: var(--gold-light); margin-bottom: 0.8rem;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .modal-lesson ul { padding-left: 1.2rem; }
+    .modal-lesson li {
+      font-size: 0.9rem; color: var(--cream-dim);
+      line-height: 1.7; margin-bottom: 0.4rem; font-weight: 300;
+    }
+
+    .modal-nav {
+      display: flex; gap: 0.8rem;
+      margin-top: 1.8rem; justify-content: center; flex-wrap: wrap;
+    }
+    .modal-nav button {
+      background: transparent; color: var(--cream-dim);
+      border: 1px solid var(--border-soft);
+      border-radius: 4px; padding: 0.6rem 1.4rem;
+      font-weight: 500; cursor: pointer;
+      font-size: 0.78rem; letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .modal-nav button:hover:not(:disabled) {
+      border-color: var(--gold-dim); color: var(--gold-light);
+    }
+    .modal-nav button:disabled { opacity: 0.25; cursor: default; }
+
+    .btn-mark-read {
+      background: transparent; color: var(--cream-dim);
+      border: 1px solid var(--border-soft);
+      font-weight: 500; font-size: 0.82rem;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 0.65rem 1.5rem;
+      border-radius: 4px; cursor: pointer;
+      transition: all 0.2s; font-family: 'Inter', sans-serif;
+      margin-top: 1rem; display: block; width: 100%;
+    }
+    .btn-mark-read:hover { border-color: var(--gold-dim); color: var(--gold-light); }
+    .btn-mark-read.is-read {
+      border-color: rgba(80,160,80,0.4);
+      color: #6dbf6d; background: rgba(80,160,80,0.06);
+    }
+
+    .modal h4 {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold-light); margin: 1rem 0 0.5rem;
+      font-size: 1rem; font-weight: 600;
+    }
+    .modal ul { padding-left: 1.2rem; }
+    .modal li { font-size: 0.9rem; line-height: 1.7; color: var(--cream-dim); margin-bottom: 0.3rem; font-weight: 300; }
+    .modal p { font-size: 0.92rem; line-height: 1.75; color: var(--cream-dim); margin-bottom: 0.8rem; font-weight: 300; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex; align-items: center;
+      gap: 1rem; margin: 2.5rem auto; max-width: 200px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+    }
+    .divider span { color: var(--gold-dim); font-size: 0.7rem; }
+
+    /* ── ANIMAÇÕES ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up {
+      animation: fadeUp 0.6s ease both;
+    }
+    .fade-up-2 { animation: fadeUp 0.6s 0.12s ease both; }
+    .fade-up-3 { animation: fadeUp 0.6s 0.24s ease both; }
+    .fade-up-4 { animation: fadeUp 0.6s 0.36s ease both; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      nav ul { display: none; }
+      .hamburger { display: flex; }
+      .stories-grid { grid-template-columns: 1fr; }
+      .cats-grid { grid-template-columns: repeat(2, 1fr); }
+      .pilares-grid { grid-template-columns: 1fr 1fr; }
+      .modal { padding: 2rem 1.2rem; }
+      .hero { padding: 5rem 1.2rem 3.5rem; }
+    }
+    @media (max-width: 440px) {
+      .pilares-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="page-loading">
+  <div class="loading-cross"></div>
+  <p>Palavra Viva</p>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="goHome()">
+    <div class="logo-icon">✦</div>
+    <div class="logo-text">Palavra <em>Viva</em></div>
+  </div>
+  <ul>
+    <li><a onclick="goToSummary()">Sumário</a></li>
+    <li><a onclick="showAllStories()">Devocionais</a></li>
+    <li><a href="#categorias">Temas</a></li>
+    <li><a href="#pilares">Sobre</a></li>
+    <li><a class="nav-cta" onclick="scrollToHighlights()">Ler Agora</a></li>
+    <li><div class="nav-user" id="nav-user-area"></div></li>
+  </ul>
+  <div class="hamburger" id="hamburgerBtn" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav" onclick="closeMobileOnOverlay(event)">
+  <div class="mobile-nav-inner">
+    <a onclick="goToSummary();closeMenu()">Sumário</a>
+    <a onclick="showAllStories();closeMenu()">Devocionais</a>
+    <a href="#categorias" onclick="closeMenu()">Temas</a>
+    <a href="#pilares" onclick="closeMenu()">Sobre</a>
+    <a onclick="scrollToHighlights();closeMenu()">✦ Ler Agora</a>
+    <div id="mobile-user-area"></div>
+  </div>
+</div>
+
+<div class="banner-upgrade" id="bannerUpgrade">
+  Acesso limitado · Você está vendo os devocionais gratuitos.
+  <a onclick="window.location.href='/login.html'">Entre ou cadastre-se</a> para acessar todos os 1.160 devocionais.
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-ornament"></div>
+
+  <span class="hero-date fade-up" id="heroDate"></span>
+
+  <h1 class="fade-up-2">Palavra<br><em>Viva</em></h1>
+  <p class="hero-tagline fade-up-3">Devocional Diário · 1.160 reflexões para a sua jornada de fé</p>
+
+  <div class="hero-verse-block fade-up-3">
+    <blockquote>"A tua palavra é lâmpada para os meus pés e luz para o meu caminho."</blockquote>
+    <cite>Salmos 119:105</cite>
+  </div>
+
+  <div class="hero-btns fade-up-4">
+    <button class="btn btn-primary" onclick="showAllStories()">Explorar Devocionais</button>
+    <button class="btn btn-secondary" onclick="goToSummary()">Ver Sumário</button>
+  </div>
+
+  <div class="search-bar fade-up-4">
+    <input type="text" id="searchInput" placeholder="Buscar por tema, versículo ou palavra..."/>
+    <button onclick="doSearch()">Buscar</button>
+  </div>
+</section>
+
+<!-- TAGS -->
+<div class="tags-bar">
+  <span class="tag">1.160 Devocionais</span>
+  <span class="tag">Reflexão Profunda</span>
+  <span class="tag">Progresso em Nuvem</span>
+  <span class="tag">Acesso Mobile</span>
+  <span class="tag">Fiel à Escritura</span>
+</div>
+
+<!-- SEARCH RESULTS -->
+<div id="search-results">
+  <div class="container">
+    <h2 id="search-title"></h2>
+    <div class="stories-grid" id="search-grid"></div>
+    <div style="text-align:center;margin-top:2.5rem">
+      <button class="btn btn-secondary" onclick="clearSearch()">← Voltar ao início</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIAS / TEMAS -->
+<section class="section section-alt" id="categorias">
+  <div class="container">
+    <p class="section-label">Temas</p>
+    <h2 class="section-title">Explore por categoria</h2>
+    <p class="section-sub">Cada trilha te guia por uma dimensão diferente da vida com Deus</p>
+    <div class="cats-grid">
+      <div class="cat-card" onclick="filterCategory('Pentateuco')">
+        <span class="cat-icon">📜</span>
+        <span class="cat-name">Pentateuco</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('História de Israel')">
+        <span class="cat-icon">🏛️</span>
+        <span class="cat-name">História de Israel</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Poesia e Sabedoria')">
+        <span class="cat-icon">🎵</span>
+        <span class="cat-name">Poesia e Sabedoria</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Profetas Maiores')">
+        <span class="cat-icon">🔥</span>
+        <span class="cat-name">Profetas Maiores</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Profetas Menores')">
+        <span class="cat-icon">🕊️</span>
+        <span class="cat-name">Profetas Menores</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Evangelhos')">
+        <span class="cat-icon">✝️</span>
+        <span class="cat-name">Evangelhos</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Parábolas de Jesus')">
+        <span class="cat-icon">🌾</span>
+        <span class="cat-name">Parábolas de Jesus</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Atos dos Apóstolos')">
+        <span class="cat-icon">⚡</span>
+        <span class="cat-name">Atos dos Apóstolos</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Cartas de Paulo')">
+        <span class="cat-icon">✉️</span>
+        <span class="cat-name">Cartas de Paulo</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Cartas Gerais')">
+        <span class="cat-icon">⚓</span>
+        <span class="cat-name">Cartas Gerais</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Apocalipse')">
+        <span class="cat-icon">👁️</span>
+        <span class="cat-name">Apocalipse</span>
+      </div>
+      <div class="cat-card" onclick="filterCategory('Estudo Bíblico')">
+        <span class="cat-icon">📖</span>
+        <span class="cat-name">Estudo Bíblico</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEVOCIONAIS EM DESTAQUE -->
+<section class="section" id="historias">
+  <div class="container">
+    <p class="section-label">Em destaque</p>
+    <h2 class="section-title">Devocionais selecionados</h2>
+    <p class="section-sub">Uma curadoria especial para começar sua jornada</p>
+    <div class="stories-grid" id="main-stories-grid"></div>
+    <div class="divider"><span>✦</span></div>
+    <div style="text-align:center;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="showAllStories()">Ver Todos os Devocionais</button>
+      <button class="btn btn-secondary" onclick="goToSummary()">Ver Sumário</button>
+    </div>
+  </div>
+</section>
+
+<!-- VERSÍCULO DESTAQUE -->
+<section class="verse-section">
+  <div class="container">
+    <div class="verse-ornament">"</div>
+    <blockquote>
+      "Não cessamos de orar por vós e de pedir que sejais cheios do conhecimento da sua vontade, em toda a sabedoria e inteligência espiritual."
+    </blockquote>
+    <cite>Colossenses 1:9</cite>
+  </div>
+</section>
+
+<!-- PILARES / SOBRE -->
+<section class="section section-alt" id="pilares">
+  <div class="container">
+    <p class="section-label">Por que o Palavra Viva</p>
+    <h2 class="section-title">Uma jornada intencional de fé</h2>
+    <p class="section-sub">Ferramentas para aprofundar sua vida devocional</p>
+    <div class="pilares-grid">
+      <div class="pilar-card" onclick="showPilarModal('reflexao')">
+        <span class="pilar-icon">📖</span>
+        <div class="pilar-title">Reflexão Profunda</div>
+        <p class="pilar-desc">Cada devocional é desenvolvido para levar à meditação real, não apenas à leitura superficial.</p>
+      </div>
+      <div class="pilar-card" onclick="showPilarModal('oracao')">
+        <span class="pilar-icon">🙏</span>
+        <div class="pilar-title">Guia de Oração</div>
+        <p class="pilar-desc">Sugestões práticas de oração baseadas no texto estudado, para um tempo mais rico com Deus.</p>
+      </div>
+      <div class="pilar-card" onclick="showPilarModal('aplicacao')">
+        <span class="pilar-icon">🎯</span>
+        <div class="pilar-title">Aplicação Prática</div>
+        <p class="pilar-desc">A Palavra de Deus transformando situações reais do cotidiano — trabalho, família, relacionamentos.</p>
+      </div>
+      <div class="pilar-card" onclick="showPilarModal('progresso')">
+        <span class="pilar-icon">📊</span>
+        <div class="pilar-title">Acompanhe seu Progresso</div>
+        <p class="pilar-desc">Marque devocionais como lidos, acompanhe sua consistência e construa uma disciplina espiritual.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Palavra <em>Viva</em></div>
+  <p>Um projeto criado para aprofundar a vida devocional de cristãos que buscam conhecer mais a Deus cada dia.</p>
+  <div class="footer-dev">Desenvolvido por <strong>Jhony Beraldo</strong> com devoção e atenção à Palavra</div>
+</footer>
+
+<!-- MODAL DEVOCIONAL -->
+<div class="modal-overlay" id="storyModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <span class="modal-emoji" id="modalEmoji"></span>
+    <h2 id="modalTitle"></h2>
+    <p class="modal-ref" id="modalRef"></p>
+    <div class="modal-story" id="modalStory"></div>
+    <div class="modal-lesson" id="modalLesson"></div>
+    <button class="btn-mark-read" id="markReadBtn" onclick="toggleRead()">◯ Marcar como lido</button>
+    <div class="modal-nav">
+      <button id="prevBtn" onclick="navigateStory(-1)">← Anterior</button>
+      <button id="nextBtn" onclick="navigateStory(1)">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PILARES -->
+<div class="modal-overlay" id="paisModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closePaisModal()">✕</button>
+    <div id="paisContent"></div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/stories.js"></script>
+<script src="/auth.js"></script>
+<script>
+// ── DATA NO HERO ──
+(function() {
+  var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var hoje = new Date();
+  var txt = hoje.getDate() + ' de ' + meses[hoje.getMonth()] + ', ' + hoje.getFullYear();
+  var el = document.getElementById('heroDate');
+  if (el) el.textContent = txt;
+})();
+
+// ── ESTADO ──
+var currentList = [];
+var currentIdx  = 0;
+var _readIds    = [];
+
+var CURATED = [1,153,691,707,741,809,851,889,975,1037,1085,1115];
+var _cadeadoAcao = 'login';
+var _cadeadoLink = '';
+var _userLogado = false;
+var _userProfile = null;
+
+function isDestaque(id) { return CURATED.indexOf(id) >= 0; }
+
+// ── INIT ──
+(async function() {
+  if (typeof stories !== 'undefined') {
+    stories.sort(function(a,b){ return a.id - b.id; });
+    currentList = stories.slice();
+  }
+
+  try {
+    var cfgs = await getConfiguracoes();
+    var cfgMap = {};
+    cfgs.forEach(function(c){ cfgMap[c.chave] = c.valor; });
+    if (cfgMap['historias_destaque']) {
+      CURATED = cfgMap['historias_destaque'].split(',').map(function(x){ return parseInt(x.trim()); }).filter(function(x){ return x >= 1 && x <= 1160; });
+    }
+    if (cfgMap['cadeado_acao']) _cadeadoAcao = cfgMap['cadeado_acao'];
+    if (cfgMap['cadeado_link']) _cadeadoLink = cfgMap['cadeado_link'];
+  } catch(e) {}
+
+  var session = await getSession();
+  if (!session || !session.user) {
+    window.location.href = '/login.html';
+    return;
+  }
+
+  var temAcesso = false;
+
+  if (session && session.user) {
+    _userLogado = true;
+    _userProfile = await getProfile();
+    temAcesso = _userProfile && (_userProfile.role === 'super' || _userProfile.role === 'admin' || await hasActiveAccess(_userProfile));
+
+    if (temAcesso) _readIds = await getReadIds();
+
+    var nome = (_userProfile && _userProfile.nome) || session.user.email;
+    var primeiroNome = nome.split(' ')[0];
+    var role = _userProfile ? _userProfile.role : 'user';
+    var painelDest = role === 'super' ? '/super.html' : (role === 'admin' ? '/admin.html' : '');
+
+    var navArea = document.getElementById('nav-user-area');
+    navArea.innerHTML = '';
+
+    if (painelDest) {
+      var bpDesktop = document.createElement('button');
+      bpDesktop.className = 'btn-painel';
+      bpDesktop.textContent = role === 'super' ? '⚙ Painel' : '⛪ Painel';
+      bpDesktop.onclick = function(){ window.location.href = painelDest; };
+      navArea.appendChild(bpDesktop);
+    }
+
+    var spanNome = document.createElement('span');
+    spanNome.className = 'nav-user-name';
+    spanNome.textContent = primeiroNome;
+    navArea.appendChild(spanNome);
+
+    var btnSair = document.createElement('button');
+    btnSair.className = 'btn-logout';
+    btnSair.textContent = 'Sair';
+    btnSair.onclick = signOut;
+    navArea.appendChild(btnSair);
+
+    var mobileArea = document.getElementById('mobile-user-area');
+    mobileArea.innerHTML = '';
+    if (painelDest) {
+      var bpMobile = document.createElement('a');
+      bpMobile.textContent = role === 'super' ? '⚙ Painel Master' : '⛪ Painel Admin';
+      bpMobile.style.cssText = 'color:var(--gold);font-weight:600;cursor:pointer';
+      bpMobile.onclick = function(){ window.location.href = painelDest; };
+      mobileArea.appendChild(bpMobile);
+    }
+    var sairMobile = document.createElement('a');
+    sairMobile.textContent = 'Sair';
+    sairMobile.style.cssText = 'color:#b04040;font-weight:600;cursor:pointer';
+    sairMobile.onclick = signOut;
+    mobileArea.appendChild(sairMobile);
+
+  } else {
+    var navArea2 = document.getElementById('nav-user-area');
+    var btnLogin = document.createElement('button');
+    btnLogin.className = 'nav-cta';
+    btnLogin.textContent = 'Entrar';
+    btnLogin.onclick = function(){ window.location.href = '/login.html'; };
+    navArea2.appendChild(btnLogin);
+
+    var mobileArea2 = document.getElementById('mobile-user-area');
+    var aLogin = document.createElement('a');
+    aLogin.textContent = 'Entrar / Cadastrar';
+    aLogin.style.cssText = 'color:var(--gold);font-weight:600;cursor:pointer';
+    aLogin.onclick = function(){ window.location.href = '/login.html'; };
+    mobileArea2.appendChild(aLogin);
+
+    document.getElementById('bannerUpgrade').style.display = 'block';
+  }
+
+  if (typeof stories !== 'undefined') {
+    var curatedList = [];
+    for (var i=0; i<CURATED.length; i++) {
+      for (var j=0; j<stories.length; j++) {
+        if (stories[j].id === CURATED[i]) { curatedList.push(stories[j]); break; }
+      }
+    }
+    renderStories(curatedList, 'main-stories-grid', temAcesso);
+  }
+
+  var urlParams = new URLSearchParams(window.location.search);
+  var openId = parseInt(urlParams.get('story'));
+  if (openId) { currentList = stories.slice(); setTimeout(function(){ openStory(openId, temAcesso); }, 300); }
+
+  document.getElementById('page-loading').style.display = 'none';
+})();
+
+// ── READ ──
+function isRead(id) { return _readIds.indexOf(id) >= 0; }
+
+async function toggleRead() {
+  var s = currentList[currentIdx];
+  if (!s) return;
+  var novo = await toggleReadCloud(s.id);
+  if (novo) { if (_readIds.indexOf(s.id) < 0) _readIds.push(s.id); }
+  else { _readIds = _readIds.filter(function(x){ return x !== s.id; }); }
+  updateMarkBtn(s.id);
+  refreshBadges();
+}
+
+function updateMarkBtn(id) {
+  var btn = document.getElementById('markReadBtn');
+  if (!btn) return;
+  if (isRead(id)) { btn.textContent = '✓ Lido'; btn.classList.add('is-read'); }
+  else { btn.textContent = '◯ Marcar como lido'; btn.classList.remove('is-read'); }
+}
+
+function refreshBadges() {
+  var cards = document.querySelectorAll('[data-sid]');
+  for (var i=0; i<cards.length; i++) {
+    var badge = cards[i].querySelector('.story-read-badge');
+    if (badge) badge.textContent = isRead(parseInt(cards[i].dataset.sid)) ? '✓' : '';
+  }
+}
+
+// ── RENDER CARDS ──
+function renderStories(list, containerId, temAcesso) {
+  var grid = document.getElementById(containerId);
+  if (!grid) return;
+  if (temAcesso === undefined) temAcesso = _userLogado;
+  var sorted = list.slice().sort(function(a,b){ return a.id - b.id; });
+  grid.innerHTML = '';
+  for (var i=0; i<sorted.length; i++) {
+    var s = sorted[i];
+    var livre = isDestaque(s.id) || temAcesso;
+    var div = document.createElement('div');
+    div.className = 'story-card' + (livre ? '' : ' locked');
+    div.dataset.sid = s.id;
+    var badge = isRead(s.id) ? '✓' : '';
+    div.innerHTML =
+      '<div class="story-thumb ' + s.thumb + '">' + s.emoji + '</div>' +
+      '<div class="story-body">' +
+        '<h3>' + s.title + '<span class="story-read-badge">' + badge + '</span></h3>' +
+        '<p>' + s.preview + '</p>' +
+        '<div class="ref">' + s.ref + '</div>' +
+        (livre ? '<button class="read-btn" onclick="openStory(' + s.id + ')">Ler devocional →</button>' : '') +
+      '</div>';
+    if (!livre) div.onclick = function(){
+      if (_cadeadoAcao === 'nada') return;
+      if (_cadeadoAcao === 'link' && _cadeadoLink) { window.location.href = _cadeadoLink; return; }
+      window.location.href = '/login.html';
+    };
+    grid.appendChild(div);
+  }
+}
+
+// ── MODAL ──
+function openStory(id, temAcesso) {
+  if (temAcesso === undefined) temAcesso = _userLogado;
+  if (!isDestaque(id) && !temAcesso) {
+    if (_cadeadoAcao === 'nada') return;
+    if (_cadeadoAcao === 'link' && _cadeadoLink) { window.location.href = _cadeadoLink; return; }
+    window.location.href = '/login.html'; return;
+  }
+  if (!currentList.length) currentList = stories.slice();
+  var idx = -1;
+  for (var i=0; i<currentList.length; i++) { if (currentList[i].id === id) { idx=i; break; } }
+  if (idx < 0) { currentList = stories.slice(); for (var i=0; i<currentList.length; i++) { if (currentList[i].id === id) { idx=i; break; } } }
+  currentIdx = Math.max(0, idx);
+  renderModal();
+  document.getElementById('storyModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderModal() {
+  var s = currentList[currentIdx];
+  if (!s) return;
+  document.getElementById('modalEmoji').textContent = s.emoji;
+  document.getElementById('modalTitle').textContent = s.title;
+  document.getElementById('modalRef').textContent = s.ref;
+  var storyHtml = '';
+  for (var i=0; i<s.story.length; i++) storyHtml += '<p>' + s.story[i] + '</p>';
+  document.getElementById('modalStory').innerHTML = storyHtml;
+  var lessonHtml = '<h4>Reflexão e Aplicação</h4><ul>';
+  for (var i=0; i<s.lesson.length; i++) lessonHtml += '<li>' + s.lesson[i] + '</li>';
+  lessonHtml += '</ul>';
+  document.getElementById('modalLesson').innerHTML = lessonHtml;
+  document.getElementById('prevBtn').disabled = currentIdx === 0;
+  document.getElementById('nextBtn').disabled = currentIdx === currentList.length - 1;
+  document.querySelector('.modal').scrollTop = 0;
+  updateMarkBtn(s.id);
+}
+
+function navigateStory(dir) {
+  currentIdx += dir;
+  if (currentIdx < 0) currentIdx = 0;
+  if (currentIdx >= currentList.length) currentIdx = currentList.length - 1;
+  renderModal();
+}
+function closeModal() {
+  document.getElementById('storyModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ── PILARES MODAL ──
+var pilaresData = {
+  reflexao: { emoji:'📖', title:'Reflexão Profunda', content:'<p>Cada devocional do Palavra Viva é desenvolvido com um propósito claro: levar você a uma meditação genuína na Palavra de Deus.</p><h4>Como usar o devocional:</h4><ul><li>Reserve 15-20 minutos sem distrações</li><li>Leia o texto bíblico antes de começar o devocional</li><li>Anote o que o Espírito Santo falar ao seu coração</li><li>Não tenha pressa — permita que a Palavra te alcance</li></ul>' },
+  oracao:   { emoji:'🙏', title:'Guia de Oração', content:'<p>A oração é o coração da vida devocional. Cada reflexão termina com sugestões práticas para tornar seu tempo de oração mais rico.</p><h4>Sugestões para orar melhor:</h4><ul><li>Use o texto do dia como ponto de partida</li><li>Interceda por alguém relacionado ao tema estudado</li><li>Ore as promessas da Escritura de volta a Deus</li><li>Deixe espaço para o silêncio e a escuta</li></ul>' },
+  aplicacao:{ emoji:'🎯', title:'Aplicação Prática', content:'<p>A Palavra de Deus não foi dada apenas para ser conhecida, mas para transformar nossa vida concreta.</p><h4>Áreas de aplicação:</h4><ul><li>Vida profissional e propósito</li><li>Relacionamentos e família</li><li>Caráter e virtudes cristãs</li><li>Fé em tempos de dificuldade</li></ul>' },
+  progresso:{ emoji:'📊', title:'Acompanhe seu Progresso', content:'<p>Construir uma disciplina espiritual exige constância. O Palavra Viva salva automaticamente seu progresso na nuvem.</p><h4>Funcionalidades:</h4><ul><li>Marque devocionais como lidos com um clique</li><li>Seu progresso sincroniza em qualquer dispositivo</li><li>Veja no sumário quais devocionais já percorreu</li><li>Recomece uma categoria quando quiser</li></ul>' }
+};
+
+function showPilarModal(type) {
+  var d = pilaresData[type];
+  document.getElementById('paisContent').innerHTML =
+    '<span class="modal-emoji">' + d.emoji + '</span>' +
+    '<h2 style="text-align:center;margin-bottom:1.2rem">' + d.title + '</h2>' +
+    '<div>' + d.content + '</div>';
+  document.getElementById('paisModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closePaisModal() {
+  document.getElementById('paisModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ── BUSCA / FILTRO ──
+function doSearch() {
+  var q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  var f = [];
+  var num = parseInt(q);
+  // Busca por número de ID
+  if (!isNaN(num) && String(num) === q.trim()) {
+    for (var i=0; i<stories.length; i++) { if (stories[i].id === num) { f.push(stories[i]); break; } }
+    if (f.length) {
+      currentList = stories.slice();
+      setTimeout(function(){ openStory(num, _userLogado || _userProfile); }, 100);
+      return;
+    }
+  }
+  var ql = q.toLowerCase();
+  for (var i=0; i<stories.length; i++) {
+    var s = stories[i];
+    if (s.title.toLowerCase().indexOf(ql) >= 0 || s.ref.toLowerCase().indexOf(ql) >= 0) f.push(s);
+  }
+  f.sort(function(a,b){ return a.id - b.id; });
+  currentList = f.slice();
+  var label = f.length
+    ? ('"' + q + '" — ' + f.length + ' resultado' + (f.length > 1 ? 's' : ''))
+    : ('Nenhum resultado para "' + q + '"');
+  document.getElementById('search-title').textContent = label;
+  document.getElementById('search-grid').innerHTML = '';
+  document.getElementById('search-results').classList.add('visible');
+  if (f.length) renderStories(f, 'search-grid', _userLogado);
+  document.getElementById('search-results').scrollIntoView({behavior:'smooth'});
+}
+
+function filterCategory(cat) {
+  var f = typeof stories !== 'undefined' ? stories.filter(function(s){ return s.category === cat; }) : [];
+  currentList = f;
+  showResults(cat + ' (' + f.length + ')', f);
+}
+
+function showAllStories() {
+  if (typeof stories === 'undefined') return;
+  currentList = stories.slice();
+  document.getElementById('search-results').classList.add('visible');
+  document.getElementById('search-title').textContent = 'Todos os Devocionais (' + stories.length + ')';
+  renderStories(currentList, 'search-grid', _userLogado);
+  document.getElementById('search-results').scrollIntoView({behavior:'smooth'});
+}
+
+function showResults(title, list) {
+  document.getElementById('search-title').textContent = title;
+  renderStories(list, 'search-grid', _userLogado);
+  document.getElementById('search-results').classList.add('visible');
+  document.getElementById('search-results').scrollIntoView({behavior:'smooth'});
+}
+
+function clearSearch() {
+  document.getElementById('search-results').classList.remove('visible');
+  document.getElementById('searchInput').value = '';
+  if (typeof stories !== 'undefined') currentList = stories.slice();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── NAVEGAÇÃO ──
+function goHome() { clearSearch(); }
+function scrollToHighlights() { document.getElementById('historias').scrollIntoView({behavior:'smooth'}); }
+function goToSummary() {
+  if (_userLogado) { window.location.href = '/sumario.html'; }
+  else { window.location.href = '/login.html'; }
+}
+
+// ── MENU MOBILE ──
+function toggleMenu() { document.getElementById('mobileNav').classList.toggle('open'); }
+function closeMenu()  { document.getElementById('mobileNav').classList.remove('open'); }
+function closeMobileOnOverlay(e) { if (e.target === document.getElementById('mobileNav')) closeMenu(); }
+
+// ── FECHAR MODAIS NO OVERLAY ──
+document.getElementById('storyModal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+document.getElementById('paisModal').addEventListener('click',  function(e){ if(e.target===this) closePaisModal(); });
+document.getElementById('searchInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doSearch(); });
+</script>
+<script src="/whatsapp-btn.js"></script>
