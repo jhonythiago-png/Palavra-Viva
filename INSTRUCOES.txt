@@ -1,0 +1,630 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║               PALAVRA VIVA — INSTRUÇÕES DE DEPLOY                   ║
+║       Devocional Diário · 1.160 Dias na Bíblia                      ║
+║       Hospedagem: GitHub + Render · Banco: Supabase                 ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Versão: 3.0 — Março 2026
+Arquitetura: Supabase (banco + auth) + GitHub (código) + Render (hospedagem)
+
+ATENÇÃO: Este arquivo foi atualizado com todas as correções testadas
+em produção. O SQL das políticas RLS abaixo é a versão CORRETA e
+definitiva. Não use versões anteriores deste arquivo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ESTRUTURA DE ARQUIVOS DO PROJETO (20 arquivos)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  index.html           → Página principal (lista + leitor de devocionais)
+  login.html           → Login / Cadastro / Recuperar senha
+  ativar.html          → Ativação de código de acesso
+  aceitar-convite.html → Aceitar convite por link
+  sumario.html         → Sumário completo com progresso
+  admin.html           → Painel do líder/admin da licença
+  super.html           → Painel master (seu painel completo)
+  story.html           → Página de leitura individual do devocional
+  auth.js              → Toda a lógica de autenticação e Supabase
+  stories.js           → 1.160 devocionais (base de conteúdo)
+  whatsapp-btn.js      → Botão flutuante WhatsApp
+  manifest.json        → PWA (instalar como app no celular)
+  _redirects           → Reescrita de rotas (Render lê este arquivo)
+  render.yaml          → Configuração oficial do Render (static site)
+  logo.png             → Logo do app (ícone na navbar e favicon)
+  icon-192.png         → Ícone PWA 192×192 (aparece na tela inicial)
+  icon-512.png         → Ícone PWA 512×512 (splash screen)
+  favicon.ico          → Ícone da aba do navegador
+  INSTRUCOES.txt       → Este arquivo
+
+SOBRE OS ÍCONES DO APP:
+  logo.png, icon-192.png e icon-512.png são o mesmo arquivo (mesmo PNG).
+  Para trocar o ícone que aparece na tela do celular quando o usuário
+  instala o app, basta substituir esses 3 arquivos pelo novo logo.
+  O visual interno do app NÃO é afetado por essa troca.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASSO 1 — CRIAR O PROJETO NO SUPABASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Acesse https://supabase.com e faça login
+2. Clique em "New Project"
+3. Preencha:
+   - Nome: palavra-viva (ou qualquer nome)
+   - Database Password: anote em local seguro
+   - Region: South America (São Paulo) — mais rápido no Brasil
+4. Aguarde o projeto ser criado (~2 minutos)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASSO 2 — CRIAR TABELAS, TRIGGER E POLÍTICAS RLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No painel Supabase, vá em "SQL Editor" e execute TODO o bloco abaixo
+de uma vez. Pode copiar e colar diretamente e clicar em "Run".
+
+⚠️  ATENÇÃO — POLÍTICAS RLS:
+As políticas abaixo foram cuidadosamente testadas e corrigidas.
+O erro mais comum em projetos Supabase é criar políticas que fazem
+subquery na própria tabela profiles (ex: SELECT FROM profiles WHERE
+role = 'super' dentro de uma policy de profiles), o que causa
+RECURSÃO INFINITA e retorna erro 500 silencioso, impedindo login
+mesmo com credenciais corretas. O SQL abaixo usa APENAS funções
+nativas (auth.uid(), auth.role()) sem nenhuma subquery. Crítico.
+
+-------- INÍCIO DO SQL — COPIE TUDO ABAIXO --------
+
+-- ============================================================
+-- TABELAS
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS profiles (
+  id            UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  nome          TEXT,
+  email         TEXT,
+  role          TEXT NOT NULL DEFAULT 'user',
+  licenca_id    UUID,
+  created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS licencas (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  codigo            TEXT NOT NULL UNIQUE,
+  nome              TEXT NOT NULL,
+  tipo              TEXT NOT NULL DEFAULT 'comprado',
+  validade_ate      DATE,
+  limite_familias   INTEGER NOT NULL DEFAULT 0,
+  familias_ativas   INTEGER NOT NULL DEFAULT 0,
+  ativa             BOOLEAN NOT NULL DEFAULT TRUE,
+  observacao        TEXT DEFAULT '',
+  licenca_admin_id  UUID,
+  created_at        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS progresso (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  story_id    INTEGER NOT NULL,
+  lida        BOOLEAN NOT NULL DEFAULT TRUE,
+  updated_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, story_id)
+);
+
+CREATE TABLE IF NOT EXISTS convites (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email       TEXT NOT NULL,
+  licenca_id  UUID NOT NULL REFERENCES licencas(id) ON DELETE CASCADE,
+  token       TEXT NOT NULL UNIQUE,
+  expira_em   TIMESTAMP WITH TIME ZONE NOT NULL,
+  usado       BOOLEAN NOT NULL DEFAULT FALSE,
+  usado_por   UUID,
+  usado_em    TIMESTAMP WITH TIME ZONE,
+  criado_por  UUID,
+  created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS configuracoes (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chave      TEXT NOT NULL UNIQUE,
+  valor      TEXT NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================================
+-- CONFIGURAÇÕES PADRÃO
+-- ============================================================
+
+INSERT INTO configuracoes (chave, valor) VALUES
+  ('whatsapp_numero',        '5544984373004'),
+  ('whatsapp_msg_visitante', 'Olá! Tenho uma dúvida sobre o Palavra Viva.'),
+  ('whatsapp_msg_cliente',   'Olá! Sou assinante do Palavra Viva e preciso de ajuda.'),
+  ('historias_destaque',     '1,153,691,707,741,809,851,889,975,1037,1085,1115'),
+  ('cadeado_acao',           'login'),
+  ('cadeado_link',           '')
+ON CONFLICT (chave) DO NOTHING;
+
+-- ============================================================
+-- TRIGGER — cria perfil automaticamente quando usuário se cadastra
+-- ============================================================
+-- Sem este trigger, o usuário fica sem perfil e o login falha.
+-- ON CONFLICT DO NOTHING evita erro se o perfil já existir.
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, nome, email, role)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'nome', split_part(NEW.email, '@', 1)),
+    NEW.email,
+    'user'
+  )
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- ============================================================
+-- RLS — habilitar segurança por linha em todas as tabelas
+-- ============================================================
+
+ALTER TABLE profiles       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE licencas       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE progresso      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE convites       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE configuracoes  ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================
+-- POLÍTICAS — profiles
+-- REGRA: cada usuário acessa apenas o próprio perfil.
+-- NÃO usa subquery em profiles — evita recursão infinita.
+-- ============================================================
+
+DROP POLICY IF EXISTS "select_own"            ON profiles;
+DROP POLICY IF EXISTS "insert_own"            ON profiles;
+DROP POLICY IF EXISTS "update_own"            ON profiles;
+DROP POLICY IF EXISTS "profiles_select"       ON profiles;
+DROP POLICY IF EXISTS "profiles_update"       ON profiles;
+DROP POLICY IF EXISTS "profiles_super_select" ON profiles;
+
+CREATE POLICY "select_own" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "insert_own" ON profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "update_own" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- ============================================================
+-- POLÍTICAS — licencas
+-- ============================================================
+
+DROP POLICY IF EXISTS "licencas_select_user"  ON licencas;
+DROP POLICY IF EXISTS "licencas_super_all"     ON licencas;
+DROP POLICY IF EXISTS "licencas_admin_select"  ON licencas;
+DROP POLICY IF EXISTS "licencas_update_member" ON licencas;
+DROP POLICY IF EXISTS "licencas_select_auth"   ON licencas;
+DROP POLICY IF EXISTS "licencas_select"        ON licencas;
+DROP POLICY IF EXISTS "licencas_insert"        ON licencas;
+DROP POLICY IF EXISTS "licencas_update"        ON licencas;
+DROP POLICY IF EXISTS "licencas_delete"        ON licencas;
+
+CREATE POLICY "licencas_select" ON licencas
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "licencas_insert" ON licencas
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "licencas_update" ON licencas
+  FOR UPDATE USING (auth.role() = 'authenticated');
+
+CREATE POLICY "licencas_delete" ON licencas
+  FOR DELETE USING (auth.role() = 'authenticated');
+
+-- ============================================================
+-- POLÍTICAS — progresso
+-- ============================================================
+
+DROP POLICY IF EXISTS "progresso_all"   ON progresso;
+DROP POLICY IF EXISTS "progresso_super" ON progresso;
+
+CREATE POLICY "progresso_all" ON progresso
+  FOR ALL USING (auth.uid() = user_id);
+
+-- ============================================================
+-- POLÍTICAS — convites
+-- ============================================================
+
+DROP POLICY IF EXISTS "convites_select" ON convites;
+DROP POLICY IF EXISTS "convites_insert" ON convites;
+DROP POLICY IF EXISTS "convites_update" ON convites;
+
+CREATE POLICY "convites_select" ON convites
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "convites_insert" ON convites
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "convites_update" ON convites
+  FOR UPDATE USING (auth.role() = 'authenticated');
+
+-- ============================================================
+-- POLÍTICAS — configuracoes
+-- ============================================================
+
+DROP POLICY IF EXISTS "cfg_select" ON configuracoes;
+DROP POLICY IF EXISTS "cfg_insert" ON configuracoes;
+DROP POLICY IF EXISTS "cfg_update" ON configuracoes;
+
+CREATE POLICY "cfg_select" ON configuracoes
+  FOR SELECT USING (true);
+
+CREATE POLICY "cfg_insert" ON configuracoes
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "cfg_update" ON configuracoes
+  FOR UPDATE USING (auth.role() = 'authenticated');
+
+-------- FIM DO SQL --------
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASSO 3 — PEGAR AS CREDENCIAIS DO SUPABASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No painel Supabase:
+1. Clique em "Settings" (ícone de engrenagem) → "API"
+2. Copie:
+   - Project URL     → parece: https://abcxyz.supabase.co
+   - anon public key → chave longa começando com "eyJ..."
+
+3. Abra o arquivo auth.js e substitua as duas linhas no topo:
+
+   var SUPABASE_URL = 'COLE_SUA_URL_AQUI';
+   var SUPABASE_KEY = 'COLE_SUA_CHAVE_ANON_AQUI';
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASSO 4 — DESATIVAR CONFIRMAÇÃO DE E-MAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Por padrão, o Supabase exige que o usuário confirme o e-mail antes
+de fazer login. Para que o fluxo seja direto:
+  Cadastro → Login imediato → Tela de ativação de código
+
+Faça o seguinte:
+1. Supabase → "Authentication" → "Providers"
+2. Clique em "Email"
+3. DESATIVE a opção "Confirm email"
+4. Clique em "Save"
+
+Pronto. Usuários cadastrados já podem fazer login imediatamente,
+sem precisar verificar o e-mail primeiro.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASSO 5 — CRIAR SUA CONTA DE SUPER ADMIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IMPORTANTE: Faça isso ANTES de publicar o site.
+
+1. No Supabase → "Authentication" → "Users"
+2. Clique em "Add user" → "Create new user"
+3. Preencha seu e-mail e senha forte → "Create User"
+4. Copie o UUID do usuário criado (coluna "UID")
+5. Vá em "SQL Editor" e execute:
+
+   UPDATE profiles SET role = 'super' WHERE id = 'SEU-UUID-AQUI';
+
+6. Confirme com:
+
+   SELECT id, email, role FROM profiles WHERE role = 'super';
+
+Deve retornar sua linha com role = 'super'.
+
+POR QUE O SUPER ADMIN NÃO PRECISA DE CÓDIGO DE ATIVAÇÃO?
+  O sistema verifica o campo role na tabela profiles.
+  Se for 'super' → redireciona para super.html (pula ativar.html).
+  Se for 'admin' → redireciona para admin.html (pula ativar.html).
+  Se for 'user' sem licença → vai para ativar.html.
+  Se for 'user' com licença ativa → vai para index.html.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASSO 6 — SUBIR O CÓDIGO NO GITHUB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPÇÃO A — Via terminal:
+  git init
+  git add .
+  git commit -m "Palavra Viva v3.0"
+  git branch -M main
+  git remote add origin https://github.com/SEU-USUARIO/palavra-viva.git
+  git push -u origin main
+
+OPÇÃO B — Via interface do GitHub (mais fácil):
+  1. Crie o repositório em https://github.com/new
+  2. Clique em "uploading an existing file"
+  3. Arraste TODOS os arquivos → "Commit changes"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASSO 7 — CONFIGURAR O SITE NO RENDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Acesse https://render.com → "New +" → "Static Site"
+2. Conecte seu GitHub e selecione o repositório "palavra-viva"
+3. Configure:
+   - Name:              palavra-viva
+   - Branch:            main
+   - Root Directory:    (deixe em branco)
+   - Build Command:     (deixe em branco)
+   - Publish Directory: . (um ponto — raiz do repo)
+4. Clique em "Create Static Site"
+5. Aguarde o deploy (~1 minuto)
+
+SOBRE _redirects e render.yaml:
+  O Render lê _redirects automaticamente (mesmo formato do Netlify).
+  O render.yaml também está incluído com as rotas explícitas.
+  Ambos garantem que /login → /login.html, /admin → /admin.html,
+  etc. funcionem sem erros 404.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASSO 8 — CONFIGURAR O REDIRECT DO SUPABASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Supabase → "Authentication" → "URL Configuration"
+2. Site URL:      https://palavra-viva.onrender.com
+3. Redirect URLs: https://palavra-viva.onrender.com/login.html
+4. Salve
+
+(substitua "palavra-viva" pelo nome real do seu site no Render)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ATUALIZAR O SITE (DEPLOY AUTOMÁTICO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Todo push no GitHub dispara deploy automático no Render:
+  git add .
+  git commit -m "descrição da mudança"
+  git push
+
+Ou edite diretamente no GitHub.com → o Render atualiza sozinho (~1min).
+
+Para atualizar só um arquivo (ex: trocar o logo):
+  - Acesse seu repositório no GitHub
+  - Clique no arquivo → ícone de lápis (Edit)
+  - Faça a mudança → "Commit changes"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CHECKLIST FINAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] auth.js com SUPABASE_URL e SUPABASE_KEY corretos
+[ ] SQL completo executado no Supabase (tabelas + trigger + RLS)
+[ ] Confirmação de e-mail DESATIVADA (Authentication → Providers → Email)
+[ ] Conta super admin criada com role = 'super' via SQL
+[ ] Repositório GitHub com todos os 20 arquivos
+[ ] Site no Render com Publish Directory = "." (ponto)
+[ ] Site URL configurado no Supabase (Authentication → URL Configuration)
+[ ] logo.png, icon-192.png, icon-512.png com seu logo
+[ ] WhatsApp configurado no super.html
+[ ] Devocionais destaque configurados no super.html
+[ ] Fluxo completo testado: cadastro → login → código → leitura
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SOLUÇÃO DE PROBLEMAS — ERROS CONHECIDOS E CORRIGIDOS EM PRODUÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+╔══════════════════════════════════════════════════════════════════════╗
+║  PROBLEMA CRÍTICO — Super admin vai para ativar.html mesmo com      ║
+║  role = 'super' correto no banco                                    ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+CAUSA:
+  Políticas RLS com recursão infinita na tabela profiles.
+  Quando uma policy faz subquery na mesma tabela que está sendo
+  consultada, o Supabase entra em loop e retorna erro 500 silencioso.
+  O app recebe null no lugar do perfil e redireciona para ativar.html.
+
+  Exemplo do padrão PROIBIDO que causa o problema:
+
+  -- ERRADO — causa recursão infinita e erro 500:
+  CREATE POLICY "profiles_super_select" ON profiles FOR SELECT
+    USING (EXISTS (
+      SELECT 1 FROM profiles p      -- subquery em profiles
+      WHERE p.id = auth.uid()       -- dentro de policy de profiles
+      AND p.role = 'super'          -- = RECURSÃO INFINITA
+    ));
+
+SOLUÇÃO — execute no SQL Editor do Supabase:
+
+  -- Passo 1: remover policies problemáticas
+  DROP POLICY IF EXISTS "profiles_select"       ON profiles;
+  DROP POLICY IF EXISTS "profiles_update"       ON profiles;
+  DROP POLICY IF EXISTS "profiles_super_select" ON profiles;
+
+  -- Passo 2: recriar sem subquery (usando apenas auth.uid())
+  CREATE POLICY "select_own" ON profiles
+    FOR SELECT USING (auth.uid() = id);
+
+  CREATE POLICY "insert_own" ON profiles
+    FOR INSERT WITH CHECK (auth.uid() = id);
+
+  CREATE POLICY "update_own" ON profiles
+    FOR UPDATE USING (auth.uid() = id);
+
+  Após executar: faça logout e login novamente para testar.
+
+╔══════════════════════════════════════════════════════════════════════╗
+║  PROBLEMA — Erro 500 em configuracoes, licencas ou progresso        ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+CAUSA:
+  O mesmo padrão de recursão pode acontecer em outras tabelas
+  se as policies consultam profiles para verificar o role.
+
+  -- ERRADO em qualquer tabela:
+  CREATE POLICY "cfg_update" ON configuracoes FOR UPDATE
+    USING (EXISTS (
+      SELECT 1 FROM profiles p     -- subquery em profiles
+      WHERE p.id = auth.uid()
+      AND p.role = 'super'         -- causa recursão em profiles
+    ));
+
+SOLUÇÃO:
+  Usar auth.role() = 'authenticated' para acesso geral.
+  O controle super/admin é feito pelo JavaScript (auth.js),
+  não pelas policies do banco. O SQL do Passo 2 já está correto.
+
+  Execute para corrigir:
+  DROP POLICY IF EXISTS "cfg_insert" ON configuracoes;
+  DROP POLICY IF EXISTS "cfg_update" ON configuracoes;
+  CREATE POLICY "cfg_insert" ON configuracoes
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+  CREATE POLICY "cfg_update" ON configuracoes
+    FOR UPDATE USING (auth.role() = 'authenticated');
+
+╔══════════════════════════════════════════════════════════════════════╗
+║  PROBLEMA — Perfil não criado após cadastro                         ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+DIAGNÓSTICO:
+  SELECT COUNT(*) FROM profiles;
+  SELECT COUNT(*) FROM auth.users;
+  Se profiles tiver menos registros que auth.users, o trigger falhou.
+
+SOLUÇÃO — recriar o trigger:
+
+  CREATE OR REPLACE FUNCTION public.handle_new_user()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    INSERT INTO public.profiles (id, nome, email, role)
+    VALUES (
+      NEW.id,
+      COALESCE(NEW.raw_user_meta_data->>'nome', split_part(NEW.email,'@',1)),
+      NEW.email,
+      'user'
+    )
+    ON CONFLICT (id) DO NOTHING;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+  DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+  CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+  Para corrigir usuários que ficaram sem perfil:
+
+  INSERT INTO profiles (id, email, nome, role)
+  SELECT
+    id,
+    email,
+    COALESCE(raw_user_meta_data->>'nome', split_part(email,'@',1)),
+    'user'
+  FROM auth.users
+  WHERE id NOT IN (SELECT id FROM profiles)
+  ON CONFLICT (id) DO NOTHING;
+
+╔══════════════════════════════════════════════════════════════════════╗
+║  PROBLEMA — Login falha com credenciais corretas                    ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+DIAGNÓSTICO — abra o console do navegador (F12 → Console):
+  "Email not confirmed"      → desative confirmação (Passo 4)
+  "Invalid login credentials"→ e-mail ou senha errados
+  Resposta null ou erro 500  → problema de RLS (ver acima)
+  Nenhum erro mas redireciona→ trigger sem perfil (ver acima)
+
+Verificar credenciais em auth.js:
+  var SUPABASE_URL = '...'; // deve terminar em .supabase.co
+  var SUPABASE_KEY = '...'; // deve começar com eyJ
+
+╔══════════════════════════════════════════════════════════════════════╗
+║  PROBLEMA — 404 ao acessar /login, /admin ou outras rotas           ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+  - Render → Settings → Publish Directory: . (ponto, não vazio)
+  - Verificar se _redirects está na raiz do repositório
+  - Verificar se render.yaml está na raiz também
+
+╔══════════════════════════════════════════════════════════════════════╗
+║  PROBLEMA — Código de ativação retorna "inválido"                   ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+  Verificar no banco:
+  SELECT codigo, nome, ativa, validade_ate, familias_ativas, limite_familias
+  FROM licencas;
+
+  O campo ativa deve ser TRUE.
+  Se limite_familias > 0, familias_ativas deve ser < limite_familias.
+  O código é convertido para maiúsculas automaticamente.
+
+╔══════════════════════════════════════════════════════════════════════╗
+║  PROBLEMA — Deploy falhou no Render                                 ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+  Render → seu site → "Deploys" → clique no deploy → leia o log.
+  Quase sempre é Publish Directory errado (use ".").
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CATEGORIAS DOS DEVOCIONAIS (stories.js)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Categoria              | Qtd  | Primeiro ID
+  -----------------------|------|------------
+  Pentateuco             |  184 |     1
+  Historia de Israel     |  508 |   153
+  Poesia e Sabedoria     |   33 |   691
+  Estudo Biblico         |   25 |   707
+  Profetas Maiores       |   69 |   741
+  Profetas Menores       |   38 |   809
+  Evangelhos             |  125 |   851
+  Parabolas de Jesus     |    8 |   889
+  Atos dos Apostolos     |   62 |   975
+  Cartas de Paulo        |   46 |  1037
+  Cartas Gerais          |   23 |  1085
+  Apocalipse             |   39 |  1115
+  -----------------------|------|------------
+  TOTAL                  | 1160 |
+
+  IDs sugeridos para destaques (1 por categoria):
+  1,153,691,707,741,809,851,889,975,1037,1085,1115
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TIPOS DE USUÁRIO E FLUXO DE ACESSO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  role = 'super'
+    → Acesso total. Login vai direto para super.html.
+    → Pode criar/editar/desativar licenças e ver estatísticas.
+    → Definido manualmente: UPDATE profiles SET role='super' WHERE id='UUID';
+
+  role = 'admin'
+    → Líder de grupo. Login vai direto para admin.html.
+    → Pode convidar e remover membros da sua licença.
+    → Definido pelo sistema ou manualmente via SQL.
+
+  role = 'user' (padrão de todo cadastro)
+    → Sem licença: vai para ativar.html após login.
+    → Com licença ativa: vai para index.html após login.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TIPOS DE LICENÇA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  individual  → Uma pessoa. limite_familias = 1
+  familiar    → Grupo/familia. limite_familias = N pessoas
+  comprado    → Acesso pago
+  bencao      → Acesso gratuito / cortesia
+  demo        → Demonstracao
+  parceiro    → Parceria / colaboracao
+  vitalicio   → validade_ate = NULL (sem data de expiracao)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Palavra Viva . 1.160 Dias na Biblia
+"Lampada para os meus pes e a tua palavra, e luz para o meu caminho."
+— Salmos 119:105
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
